@@ -4,13 +4,13 @@ from secrets import OPENAI_API_KEY
 
 def summarize_text(text):
     if not text.strip():
-        return "Please enter some text."
+        return "Please enter some text to summarize in 2-4 sentences."
 
     client = OpenAI(api_key=OPENAI_API_KEY)
 
     response = client.responses.create(
         model="gpt-4o-mini",
-        input=f"Summarize this text in 4–5 sentences:\n\n{text}"
+        input=f"Summarize this text in 2-4 sentences:\n\n{text}"
     )
 
     return response.output_text
