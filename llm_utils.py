@@ -1,6 +1,6 @@
 print(">>> USING UPDATED LLM_UTILS FILE <<<")
 from openai import OpenAI
-from my_secrets import OPENAI_API_KEY
+from secrets import OPENAI_API_KEY
 
 def summarize_text(text):
     if not text.strip():
