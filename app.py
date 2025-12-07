@@ -7,42 +7,49 @@ from auth_ui import login_ui, signup_ui
 # Create database tables when app starts
 create_tables()
 
+def is_authenticated():
+    # Email/password OR Google login
+    return (
+        st.session_state.get("user") is not None
+        or st.user.is_logged_in
+    )
+
 def main():
-    st.title("Login System with SQLite")
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Go to", ["Login", "Sign up", "Text summarizer"])
 
-    # Initialize session_state user if missing
-    if "user" not in st.session_state:
-        st.session_state["user"] = None
+    # Logout button (works for both methods)
+    if is_authenticated():
+        if st.sidebar.button("Logout"):
+            st.session_state["user"] = None  # clear local user
+            try:
+                st.logout()  # ends Google/OIDC session if active
+            except Exception:
+                # st.logout only exists in new Streamlit;
+                # ignore errors if any
+                pass
+            st.success("Logged out")
 
-    # If NOT logged in
-    if st.session_state["user"] is None:
-        option = st.radio("Select an option:", ["Login", "Sign up"])
+    if page == "Login":
+        login_ui()
 
-        if option == "Login":
-            login_ui()
-        else:
-            signup_ui()
+    elif page == "Sign up":
+        signup_ui()
 
-    # If logged in
-    else:
-        st.success(f"Welcome, {st.session_state['user']}!")
-        # LLM Feature
-        st.subheader("AI Text Summarizer")
+    elif page == "Text summarizer":
+        if not is_authenticated():
+            st.warning("Please log in (email/password or Google) to use the summarizer.")
+            return
 
-        user_text = st.text_area("Write or paste text to summarize:")
-
+        st.header("Text summarizer")
+        user_text = st.text_area("Enter text to summarize")
         if st.button("Summarize"):
             if user_text.strip():
                 summary = summarize_text(user_text)
-                st.subheader("Summary:")
+                st.subheader("Summary")
                 st.write(summary)
             else:
-                st.warning("Please enter some text to summarize.")
-
-        # Logout button
-        if st.button("Logout"):
-            st.session_state["user"] = None
-            st.info("You have been logged out.")
+                st.error("Please enter some text first.")
 
 if __name__ == "__main__":
     main()

@@ -39,6 +39,10 @@ def signup_ui():
 def login_ui():
     st.subheader("Login")
 
+    if "login_message" in st.session_state:
+        st.success(st.session_state["login_message"])
+        st.success(st.session_state["summarizer_message"])
+
     email = st.text_input("Email", key="login_email")
     password = st.text_input("Password", type="password", key="login_password")
 
@@ -57,8 +61,20 @@ def login_ui():
 
         if check_password(password, stored_hash):
             st.session_state["user"] = email
-            st.success("Logged in")
+            st.session_state["login_message"] = f"Logged in. Welcome, {email}!"
+            st.session_state["summarizer_message"] = f"Now you can use the text summarizer."
             st.rerun()
         else:
-            st.error("Incorrect password")
+            st.error("Invalid credentials")
 
+    st.markdown("---")
+    st.subheader("Or log in with Google")
+
+    if not st.user.is_logged_in:
+        if st.button("Log in with Google"):
+            st.login()   # uses config from secrets.toml
+    else:
+        st.success(f"Logged in with Google as {st.user.name}")
+        st.markdown(f"### 👋 Welcome, **{st.user.name}**!")
+        st.caption(f"Email: {st.user.email}")
+        st.caption(f"Now you can use the text summarizer.")
